@@ -19,14 +19,14 @@ session = Session(engine)
 app = Flask(__name__)
 
 @app.route("/")
-def home()):
+def home():
     """List all available api routes."""
     return"""<!DOCTYPE><html><h1>List of all available Honolulu, HI API routes</h1><ul>
-    <li>List of precipitation scores from the last year:<br><a href="/api/v1.0/precipitation">/api/v1.0/precipitation</a></li>
-    <li>JSON list of stations:<br><a href="/api/v1.0/stations">/api/v1.0/stations</a></li>
-    <li>JSON list of temp observations from the last year:<br><a href="/api/v1.0/tobs">/api/v1.0/tobs</a></li>
-    <li>JSON list of tmin, tmax, tavg for the date provided:<br>Replace &ltstart&gt with a date in Year-Month-Day format.<br><a href="/api/v1.0/2017-01-01">/api/v1.0/2017-01-01</a></li>
-    <li>JSON list of tmin, tmax, tavg for the dates in range of start date and end date inclusive:<br>Replace &ltstart&gt and &ltend&gt with a date in Year-Month-Day format.<a href="/api/v1.0/2017-01-01/2017-01-07">/api/v1.0/2017-01-01/2017-01-07</a></li>
+    <li>List of precipitation scores from the last year:<a href="/api/v1.0/precipitation">/api/v1.0/precipitation</a></li>
+    <li>List of stations:<a href="/api/v1.0/stations">/api/v1.0/stations</a></li>
+    <li>List of temp observations from the last year:<a href="/api/v1.0/tobs">/api/v1.0/tobs</a></li>
+    <li>List of minimum, maximum, and average temperatures for the date provided (replace &ltstart&gt with a date in 'yyyy-mm-dd' format: <a href="/api/v1.0/<start>">/api/v1.0/<start></a></li>
+    <li>List of minimum, maximum, and average temperatures for the dates in range provided (replace &ltstart&gt and &ltend&gt with dates in 'yyyy-mm-dd' format): <a href="/api/v1.0/<start>/<end>">/api/v1.0/<start>/<end></a></li>
     </ul></html>"""
 
 @app.route("/api/v1.0/precipitation")
@@ -34,7 +34,7 @@ def precipitation():
     """List of precipitation scores from the last year"""
     # calculate the date 1 year ago from latest date in database
     latest_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
-    year_ago = dt.datetime.strptime(latest_date[0], "%Y-%m-%d") - dt.timedelta(days=365)
+    year_ago = dt.datetime.strptime(latest_date[0], "%Y-%m-%d") - dt.timedelta(days=366)
     
     # retrieve precipitation scores and convert to dictionary
     last_year = dict(session.query(Measurement.date,Measurement.prcp).filter(Measurement.date >= year_ago).all())
@@ -42,18 +42,17 @@ def precipitation():
 
 @app.route("/api/v1.0/stations")
 def stations(): 
-    """JSON list of stations"""
+    """List of stations"""
     # retrieve stations and convert to list
     stations =  list(np.ravel(session.query(Measurement.station).group_by(Measurement.station).all()))
     return jsonify(stations)
 
 @app.route("/api/v1.0/tobs")
 def tobs(): 
-    """JSON list of temp observations from the last year"""
+    """List of temp observations from the last year"""
     # calculate year ago from latest date in database
     latest_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
-    year_ago = dt.datetime.strptime(latest_date[0], "%Y-%m-%d") - dt.timedelta(days=365)
-    latest_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    year_ago = dt.datetime.strptime(latest_date[0], "%Y-%m-%d") - dt.timedelta(days=366)
 
     # retrieve temp observations and convert to list
     temps = list(session.query(Measurement.date, Measurement.tobs).filter(Measurement.date >= year_ago).all())
@@ -61,14 +60,14 @@ def tobs():
 
 @app.route("/api/v1.0/<start>")
 def start(start):
-    """JSON list of tmin, tmax, tavg for the dates greater than or equal to the date provided"""
-    # retrieve temp observations from start date given and convert to list
+    """List of minimum, maximum, and average temperatures for the date provided"""
+    # retrieve temp observations from start date given and convert to list 
     start_date = list(session.query(Measurement.date, func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).group_by(Measurement.date).all())
     return jsonify(start_date)
 
 @app.route("/api/v1.0/<start>/<end>")
 def between(start, end):
-    """Return a JSON list of tmin, tmax, tavg for the dates in range of start date and end date inclusive"""
+    """List of minimum, maximum, and average temperatures for the dates in range provided"""
     # retrieve temp observations from start and end dates given and convert to list
     between_dates = list(session.query(Measurement.date, func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).group_by(Measurement.date).all())
     return jsonify(between_dates)
