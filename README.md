@@ -224,7 +224,7 @@ plt.show()
 
 Using the analysis in my ["climate-analysis" Jupyter Notebook](climate-analysis.ipynb), I created routes that could be run from the browser using Flask and routes in the ["app.py" Python file](app.py).
 
-\times Note for future:  I want to improve this by allowing the user to input their date into a box that would then take them to the page with the results printed in a more understandable way. As of the latest push, the user must follow instructions to put the dates into the url themselves.
+\* Note for future:  I want to improve this by allowing the user to input their date into a box that would then take them to the page with the results printed in a more understandable way. As of the latest push, the user must follow instructions to put the dates into the url themselves.
 
 ```python
 # import dependencies
