@@ -73,7 +73,7 @@ latest_date
 year_ago = dt.datetime.strptime(latest_date,"%Y-%m-%d") - dt.timedelta(days=366)
 year_ago
 ```
-![year-ago](images/year-ago.png)
+![year-ago-timestamp](images/year-ago.png)
 
 
 ```python
@@ -142,7 +142,18 @@ names
 stations = session.query(Station.id)
 stations.count()
 ```
-![query-station-count](images/query-station-count.png)
+![station-count](images/station-count.png)
+
+
+```python
+# query count of each station
+active_stations = session.query(Measurement.station, func.count(Measurement.station)).\
+                        group_by(Measurement.station).\
+                        order_by(func.count(Measurement.station).desc()).all()
+active_stations
+```
+
+![counts-of-each-station](images/counts-of-each-station.png)
 
 
 
@@ -177,7 +188,7 @@ highest_temps = session.query(Measurement.station,
 highest_temps
 ```
 
-![highest-temperatures](images/highest-temperatures.png)
+![station-with-highest-temperatures](images/highest-temp-station.png)
 
 
 
@@ -189,7 +200,7 @@ temps_df = pd.DataFrame(temps, columns=["Temperature"])
 temps_df.head()
 ```
 
-![temperatures-dataframe](images/temperatures-dataframe.png)
+![temperatures-dataframe](images/temp-df.png)
 
 
 #### Plotting Temperature Data at Waihee Station
